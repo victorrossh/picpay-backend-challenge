@@ -7,7 +7,6 @@ builder.Host.UseSerilog((context, options) =>
 
 builder.Services.AddDataProtection();
 
-
 var app = builder.Build();
 
 app.UseHttpsRedirection();
