@@ -1,6 +1,4 @@
 on:
-  push:
-    branches: ["main"]
   pull_request:
     branches: ["main"]
 
@@ -14,7 +12,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.x" # Use a specific .NET version if needed
+          dotnet-version: "9.x"
 
       - name: Cache Dependencies
         uses: actions/cache@v4

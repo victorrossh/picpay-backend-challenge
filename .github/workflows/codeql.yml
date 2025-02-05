@@ -1,19 +1,10 @@
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-  schedule:
-    - cron: '20 22 * * 6'
 
 jobs:
   analyze-project:
     runs-on: 'ubuntu-latest'
-    permissions:
-      security-events: write
-      packages: read
-      actions: read
-      contents: read
 
     strategy:
       fail-fast: false
