@@ -18,7 +18,7 @@ builder.Host.UseSerilog((context, options) =>
 services.AddHealthChecks();
 services.AddScoped<ExceptionFilter>();
 
-services.AddControllers(options => { options.Filters.AddService<ExceptionFilter>(); }).AddNewtonsoftJson();
+services.AddControllers(options => { options.Filters.AddService<ExceptionFilter>(); });
 services.AddEndpointsApiExplorer();
 services.AddHttpContextAccessor();
 services.AddDataProtection();

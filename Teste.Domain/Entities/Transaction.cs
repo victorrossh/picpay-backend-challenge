@@ -1,8 +1,9 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Transactions;
 using Teste.Domain.Enums;
+
+namespace Teste.Domain.Entities;
 
 [Table("tb_transaction")]
 public sealed class Transaction
