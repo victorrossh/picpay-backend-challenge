@@ -4,6 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>852a8915-b570-40a4-af99-0bde37116621</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,6 +27,12 @@
     <ItemGroup>
         <ProjectReference Include="..\Teste.Domain\Teste.Domain.csproj"/>
         <ProjectReference Include="..\Teste.Application\Teste.Application.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Controllers\" />
+      <Folder Include="Filters\" />
+      <Folder Include="MIddlewares\" />
     </ItemGroup>
 
 </Project>

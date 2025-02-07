@@ -1,7 +1,7 @@
 namespace Teste.Domain.Enums;
 
-public enum TypeAccount
+public enum AccountRole
 {
-    Shopkeeper,
+    Merchant,
     User
 }
