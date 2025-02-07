@@ -5,6 +5,8 @@ using Teste.Domain.Entities;
 using Teste.Domain.Repositories;
 using Teste.Infrastructure.Contexts;
 
+namespace Teste.Infrastructure.Repositories;
+
 public class AccountRepository(TesteDbContext context) : IAccountRepository
 {
     public async Task<bool> AddAsync(Account account, CancellationToken cancellationToken,

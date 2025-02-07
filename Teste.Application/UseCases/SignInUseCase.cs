@@ -9,6 +9,8 @@ using Teste.Domain.Repositories;
 using Teste.Shared.Constants;
 using Teste.Shared.Exceptions;
 
+namespace Teste.Application.UseCases;
+
 public class SignInUseCase(
     IAccountRepository repository,
     ITokenizationImp tokenization,
