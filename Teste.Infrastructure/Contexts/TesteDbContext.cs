@@ -22,7 +22,5 @@ public class TesteDbContext(DbContextOptions<TesteDbContext> options) : DbContex
         modelBuilder.Entity<Transaction>()
             .Property(a => a.Status)
             .HasConversion<int>();
-        
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TesteDbContext).Assembly);
     }
 }
