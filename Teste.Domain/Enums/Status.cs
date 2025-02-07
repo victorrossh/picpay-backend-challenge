@@ -1,6 +1,6 @@
 namespace Teste.Domain.Enums;
 
-public enum TransactionStatus
+public enum Status
 {
     Pending,
     Completed,

@@ -8,6 +8,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.1"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.1"/>
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.4.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="7.2.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.2.0"/>
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.2.0"/>
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.4.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.1"/>
         <PackageReference Include="Serilog" Version="4.2.0"/>
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0"/>
@@ -19,20 +31,9 @@
         </PackageReference>
     </ItemGroup>
 
-    <PropertyGroup>
-        <AnalysisLevel>latest</AnalysisLevel>
-        <AnalysisMode>All</AnalysisMode>
-    </PropertyGroup>
-
     <ItemGroup>
         <ProjectReference Include="..\Teste.Domain\Teste.Domain.csproj"/>
         <ProjectReference Include="..\Teste.Application\Teste.Application.csproj"/>
+        <ProjectReference Include="..\Teste.Shared\Teste.Shared.csproj"/>
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Controllers\" />
-      <Folder Include="Filters\" />
-      <Folder Include="MIddlewares\" />
-    </ItemGroup>
-
 </Project>
