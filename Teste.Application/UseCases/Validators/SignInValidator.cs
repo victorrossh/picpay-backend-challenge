@@ -7,8 +7,8 @@ namespace Teste.Application.UseCases.Validators;
 
 public class SignInValidator : AbstractValidator<SignInAccountIn>
 {
-    private static readonly Regex PasswordRegex = new(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$");
-
+    private static readonly Regex PasswordRegex = new(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$",
+        RegexOptions.None, TimeSpan.FromSeconds(1));
     public SignInValidator()
     {
         // Password validation rules

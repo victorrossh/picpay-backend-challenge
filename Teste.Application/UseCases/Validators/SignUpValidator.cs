@@ -8,8 +8,11 @@ namespace Teste.Application.UseCases.Validators;
 
 public class SignUpValidator : AbstractValidator<SignUpAccountIn>
 {
-    private static readonly Regex PasswordRegex = new(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$");
-    private static readonly Regex NameRegex = new(@"^[A-Za-zÀ-ÖØ-öø-ÿ\s]{3,100}$");
+    private static readonly Regex PasswordRegex = new(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$",
+        RegexOptions.None, TimeSpan.FromSeconds(1));
+
+    private static readonly Regex NameRegex = new(@"^[A-Za-zÀ-ÖØ-öø-ÿ\s]{3,100}$", RegexOptions.None,
+        TimeSpan.FromSeconds(1));
 
     public SignUpValidator()
     {
