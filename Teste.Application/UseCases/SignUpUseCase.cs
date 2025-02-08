@@ -20,41 +20,23 @@ public class SignUpUseCase(
     IHttpContextAccessor httpContextAccessor)
     : ISignUpImp
 {
+    private readonly string? _requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "Unknown";
+
     public async Task<DefaultOut?> ExecuteSignUpAsync(SignUpAccountIn request, CancellationToken cancellationToken)
     {
-        var requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "Unknown";
-
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var validation = await new SignUpValidator().ValidateAsync(request, cancellationToken);
             if (!validation.IsValid)
-            {
-                var errors = validation.Errors.Select(er => er.ErrorMessage).ToList();
-                Log.Warning("Sign-up validation failed. Errors: {Errors}, RequestId: {RequestId}", errors, requestId);
-                throw new DetailedException(errors);
-            }
-
-            if (request.Password != request.PasswordConfirmation)
-            {
-                Log.Warning("Password and confirmation do not match for email: {Email}, RequestId: {RequestId}",
-                    request.Email, requestId);
-                throw new DetailedException([Messages.PASSWORD_MISMATCH]);
-            }
+                throw new BadRequestException(validation.Errors.Select(er => er.ErrorMessage).ToList());
 
             if (await accountRepository.ExistsByEmailAsync(request.Email, cancellationToken))
-            {
-                Log.Warning("Email already registered: {Email}, RequestId: {RequestId}", request.Email, requestId);
-                throw new DetailedException([Messages.EMAIL_ALREADY_REGISTERED]);
-            }
+                throw new BadRequestException([AccountMessages.EMAIL_ALREADY_REGISTERED]);
 
             if (await accountRepository.ExistsByIdentityAsync(request.Identity, cancellationToken))
-            {
-                Log.Warning("Identity already registered: {Identity}, RequestId: {RequestId}", request.Identity,
-                    requestId);
-                throw new DetailedException([Messages.IDENTITY_ALREADY_REGISTERED]);
-            }
+                throw new BadRequestException([AccountMessages.IDENTITY_ALREADY_REGISTERED]);
 
             var account = new Account
             {
@@ -74,9 +56,7 @@ public class SignUpUseCase(
                     cancellationToken, transaction);
                 await transaction.CommitAsync(cancellationToken);
 
-                Log.Information("User signed up successfully: {RequestEmail}, RequestId: {RequestId}", request.Email,
-                    requestId);
-                return new DefaultOut(account.Id, requestId, Messages.ACCOUNT_CREATED);
+                return new DefaultOut(account.Id, _requestId, AccountMessages.ACCOUNT_CREATED);
             }
             catch (Exception)
             {
@@ -84,11 +64,14 @@ public class SignUpUseCase(
                 throw;
             }
         }
+        catch (BadRequestException)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error during sign-up process for email: {Email}, RequestId: {RequestId}", request.Email,
-                requestId);
-            throw;
+            Log.Error(ex, "Unexpected error retrieving RequestId: {RequestId}", _requestId);
+            throw new UnknownException(ex, [UnknownMessages.UNEXPECTED_ERROR]);
         }
     }
 }

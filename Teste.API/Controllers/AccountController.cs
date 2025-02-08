@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Teste.API.Controllers.Abstract;
 using Teste.Application.DTOs.Requests;
@@ -9,6 +10,7 @@ namespace Teste.API.Controllers;
 
 [ApiController]
 [Route("api/v1/auth")]
+[AllowAnonymous]
 public class AccountController(
     ISignUpImp signUp,
     ISignInImp signIn) : ControllerBase

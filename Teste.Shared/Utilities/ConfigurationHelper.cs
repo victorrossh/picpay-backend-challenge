@@ -20,16 +20,18 @@ public static class ConfigurationHelper
     public static T GetConfiguration<T>(this IConfiguration configuration, string key)
     {
         if (configuration is null)
-            throw new ArgumentNullException(nameof(configuration), "Configuration instance cannot be null.");
+            throw new ConfigurationException(["Configuration instance cannot be null."]);
 
         if (string.IsNullOrWhiteSpace(key))
-            throw new ArgumentException("Configuration key cannot be null or whitespace.", nameof(key));
+            throw new ConfigurationException(["Configuration key cannot be null or whitespace.", nameof(key)]);
 
         var value = configuration.GetSection(key).Get<T>();
 
         if (value is null || EqualityComparer<T>.Default.Equals(value, default!))
             throw new ConfigurationException(
-                $"The configuration key '{key}' is missing or cannot be converted to the expected type '{typeof(T).Name}'.");
+            [
+                $"The configuration key '{key}' is missing or cannot be converted to the expected type '{typeof(T).Name}'."
+            ]);
 
         return value;
     }
