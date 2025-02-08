@@ -9,24 +9,23 @@ public class SignInValidator : AbstractValidator<SignInAccountIn>
 {
     private static readonly Regex PasswordRegex = new(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$",
         RegexOptions.None, TimeSpan.FromSeconds(1));
+
     public SignInValidator()
     {
         // Password validation rules
         RuleFor(c => c.Password)
             .NotEmpty()
-            .WithMessage(Messages.PASSWORD_REQUIRED)
-            .MinimumLength(8)
-            .WithMessage(Messages.PASSWORD_MIN_LENGTH)
-            .MaximumLength(16)
-            .WithMessage(Messages.PASSWORD_MAX_LENGTH)
+            .WithMessage(ValidatorMessages.PASSWORD_REQUIRED)
+            .Length(8, 16)
+            .WithMessage(ValidatorMessages.PASSWORD_INVALID)
             .Matches(PasswordRegex)
-            .WithMessage(Messages.PASSWORD_INVALID);
+            .WithMessage(ValidatorMessages.PASSWORD_INVALID);
 
         // Email validation rules
         RuleFor(e => e.Email)
             .NotEmpty()
-            .WithMessage(Messages.EMAIL_REQUIRED) // Use a more appropriate error message for empty email
+            .WithMessage(ValidatorMessages.EMAIL_REQUIRED) 
             .EmailAddress()
-            .WithMessage(Messages.EMAIL_INVALID);
+            .WithMessage(ValidatorMessages.EMAIL_INVALID);
     }
 }

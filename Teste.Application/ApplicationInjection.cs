@@ -17,6 +17,7 @@ public static class ApplicationInjection
 
         services.AddScoped<ISignInImp, SignInUseCase>();
         services.AddScoped<ISignUpImp, SignUpUseCase>();
+        services.AddScoped<IWalletImp, WalletUseCase>();
 
         await services.AddInfrastructureInjection(configuration);
     }

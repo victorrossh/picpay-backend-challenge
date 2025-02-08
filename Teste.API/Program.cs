@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
-using Teste.API.Filters;
-using Teste.API.MIddlewares;
+using Teste.API.Middlewares;
 using Teste.Application;
 using Teste.Shared.Utilities;
 
@@ -16,9 +15,8 @@ builder.Host.UseSerilog((context, options) =>
     options.ReadFrom.Configuration(context.Configuration));
 
 services.AddHealthChecks();
-services.AddScoped<ExceptionFilter>();
 
-services.AddControllers(options => { options.Filters.AddService<ExceptionFilter>(); });
+services.AddControllers();
 services.AddEndpointsApiExplorer();
 services.AddHttpContextAccessor();
 services.AddDataProtection();
@@ -51,6 +49,22 @@ services.AddRouting(options =>
     options.LowercaseUrls = true;
     options.LowercaseQueryStrings = true;
 });
+var key = Encoding.ASCII.GetBytes(configuration.GetConfiguration<string>("Jwt:Secret"));
+
+var tokenValidationParameters = new TokenValidationParameters
+{
+    ValidateIssuerSigningKey = true,
+    IssuerSigningKey = new SymmetricSecurityKey(key),
+    ValidateIssuer = true,
+    ValidIssuer = configuration.GetConfiguration<string>("Jwt:Issuer"),
+    ValidateAudience = true,
+    ValidAudience = configuration.GetConfiguration<string>("Jwt:Audience"),
+    ValidateLifetime = true,
+    ClockSkew = TimeSpan.Zero
+};
+
+services.AddSingleton(tokenValidationParameters);
+
 services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -58,17 +72,7 @@ services.AddAuthentication(options =>
     })
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey =
-                new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration.GetConfiguration<string>("Jwt:Secret"))),
-            ValidIssuer = configuration.GetConfiguration<string>("Jwt:Issuer"),
-            ValidAudience = configuration.GetConfiguration<string>("Jwt:Audience"),
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.Zero
-        };
-
+        options.TokenValidationParameters = tokenValidationParameters;
         options.SaveToken = true;
         options.RequireHttpsMetadata = false;
     });
@@ -86,7 +90,9 @@ app.UseRouting();
 app.UseCors();
 app.UseHsts();
 app.UseAuthentication();
+app.UseAuthorization();
 app.UseHealthChecks("/health");
-app.UseMiddleware<RequestIdMiddleware>();
+app.UseMiddleware<AuthenticationMiddleware>();
+app.UseMiddleware<ExceptionMiddleware>();
 app.MapControllers();
 await app.RunAsync();

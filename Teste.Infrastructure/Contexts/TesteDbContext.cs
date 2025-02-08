@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Teste.Domain.Entities;
-using Teste.Domain.Enums;
 
 namespace Teste.Infrastructure.Contexts;
 
@@ -14,11 +13,11 @@ public class TesteDbContext(DbContextOptions<TesteDbContext> options) : DbContex
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
+
         modelBuilder.Entity<Account>()
             .Property(a => a.Role)
             .HasConversion<int>();
-        
+
         modelBuilder.Entity<Transaction>()
             .Property(a => a.Status)
             .HasConversion<int>();
