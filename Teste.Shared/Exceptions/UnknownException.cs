@@ -1,6 +1,7 @@
 namespace Teste.Shared.Exceptions;
 
-public class UnknownException(Exception exception, IEnumerable<string>? messages = null) : Exception
+public class UnknownException(string[]? messages = null!)
+    : Exception(string.Join(", ", messages ?? []))
 {
-    public IReadOnlyList<string> Messages { get; } = new List<string>(messages ?? Array.Empty<string>());
+    public IReadOnlyList<string> Messages { get; } = messages ?? [];
 }

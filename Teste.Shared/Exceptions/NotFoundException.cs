@@ -1,6 +1,8 @@
 namespace Teste.Shared.Exceptions;
 
-public class NotFoundException(IEnumerable<string>? messages = null) : Exception
+public class NotFoundException(string[]? messages = null!)
+    : Exception(string.Join(", ", messages ?? []))
 {
-    public IReadOnlyList<string> Messages { get; } = new List<string>(messages ?? Array.Empty<string>());
+    public IReadOnlyList<string> Messages { get; } = messages ?? []
+        ;
 }

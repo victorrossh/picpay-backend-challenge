@@ -16,7 +16,7 @@ public class AccountController(
     ISignInImp signIn) : ControllerBase
 {
     [HttpPost("signup")]
-    public async Task<BaseActionResult> SignUpRequest([FromBody] SignUpAccountIn request,
+    public async Task<BaseActionResult> SignUpRequest([FromBody] SignUpReq request,
         CancellationToken cancellationToken)
     {
         return new BaseActionResult(
@@ -25,10 +25,10 @@ public class AccountController(
     }
 
     [HttpPost("signin")]
-    public async Task<BaseActionResult<TokenOut>> SignInRequest([FromBody] SignInAccountIn request,
+    public async Task<BaseActionResult<TokenRes>> SignInRequest([FromBody] SignInReq request,
         CancellationToken cancellationToken)
     {
-        return new BaseActionResult<TokenOut>(
+        return new BaseActionResult<TokenRes>(
             HttpStatusCode.OK,
             await signIn.ExecuteSignInAsync(request, cancellationToken));
     }

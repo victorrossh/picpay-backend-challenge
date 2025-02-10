@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Http;
 using Serilog;
+using Teste.Application.DTOs.Requests;
 using Teste.Application.DTOs.Responses;
 using Teste.Application.UseCases.Implementations;
+using Teste.Application.UseCases.Validators;
 using Teste.Domain.Repositories;
 using Teste.Shared.Constants;
 using Teste.Shared.Exceptions;
@@ -14,15 +16,17 @@ public class WalletUseCase(
 {
     private readonly string? _requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "Unknown";
 
-    public async Task<BalanceOut> GetBalanceAsync(string accountId, CancellationToken cancellationToken)
+    public async Task<BalanceRes> BalanceAsync(string accountId, CancellationToken cancellationToken)
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         try
         {
             var wallet = await repository.GetByAccountIdAsync(accountId, cancellationToken);
             if (wallet is null)
                 throw new NotFoundException([WalletMessages.WALLET_NOT_FOUND]);
 
-            return new BalanceOut(wallet.Id, wallet.Balance);
+            return new BalanceRes(wallet.Id, wallet.Balance);
         }
         catch (NotFoundException)
         {
@@ -35,7 +39,48 @@ public class WalletUseCase(
         catch (Exception ex)
         {
             Log.Error(ex, "Unexpected error retrieving RequestId: {RequestId}", _requestId);
-            throw new UnknownException(ex, [UnknownMessages.UNEXPECTED_ERROR]);
+            throw new UnknownException([UnknownMessages.UNEXPECTED_ERROR]);
+        }
+    }
+
+    public async Task<DefaultRes> TransferAsync(string accountId, TransferReq request,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        try
+        {
+            var validation = await new TransferValidator().ValidateAsync(request, cancellationToken);
+            if (!validation.IsValid)
+                throw new BadRequestException(validation.Errors.Select(er => er.ErrorMessage).ToArray());
+
+            var wallet = await repository.GetByAccountIdAsync(accountId, cancellationToken);
+            if (wallet!.Id.ToString() == request.payeeId)
+                throw new BadRequestException([WalletMessages.ACCOUNT_CANNOT_TRANSFER]);
+
+            var transaction =
+                await repository.TransferAsync(wallet.Id.ToString(), request.payeeId, request.amount,
+                    cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+                throw new BadRequestException([WalletMessages.TRANSACTION_CANCELLED]);
+
+            return transaction == 1
+                ? new DefaultRes(accountId, WalletMessages.TRANSFER_SUCCESSFUL)
+                : throw new BadRequestException([WalletMessages.TRANSFER_FAILED]);
+        }
+        catch (NotFoundException)
+        {
+            throw;
+        }
+        catch (BadRequestException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Unexpected error while processing transfer for RequestId: {RequestId}", _requestId);
+            throw new UnknownException([UnknownMessages.UNEXPECTED_ERROR]);
         }
     }
 }

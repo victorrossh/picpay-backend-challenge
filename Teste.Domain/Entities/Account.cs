@@ -11,21 +11,22 @@ public sealed class Account
 
     [Required]
     [Column("name", TypeName = "nvarchar(255)")]
-    public string Name { get; set; }
+    public required string Name { get; set; }
 
     [Required]
     [Column("identity", TypeName = "nvarchar(50)")]
-    public string Identity { get; set; }
+    public required string Identity { get; set; }
 
     [Required]
     [Column("email", TypeName = "nvarchar(255)")]
-    public string Email { get; set; }
+    public required string Email { get; set; }
 
     [Required]
     [Column("password", TypeName = "nvarchar(255)")]
-    public string Password { get; set; }
+    public required string Password { get; set; }
 
     [Required] [Column("role")] public Role Role { get; set; }
 
-    [Column("created_at")] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [Required] [Column("created_at")] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

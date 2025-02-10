@@ -1,6 +1,3 @@
 namespace Teste.Shared.Exceptions;
 
-public class ConfigurationException(IEnumerable<string>? messages = null) : Exception
-{
-    public IReadOnlyList<string> Messages { get; } = new List<string>(messages ?? Array.Empty<string>());
-}
+public class ConfigurationException(string[]? messages = null!) : Exception(string.Join(", ", messages ?? []));

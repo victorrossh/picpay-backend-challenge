@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Serilog;
-using Teste.Application.DTOs.Requests;
+﻿using Teste.Application.DTOs.Requests;
 using Teste.Application.DTOs.Responses;
 using Teste.Application.Services.Implementations;
 using Teste.Application.UseCases.Implementations;
@@ -14,13 +12,10 @@ namespace Teste.Application.UseCases;
 public class SignInUseCase(
     IAccountRepository repository,
     ITokenizationImp tokenization,
-    ICryptographyImp cryptography,
-    IHttpContextAccessor httpContextAccessor)
+    ICryptographyImp cryptography)
     : ISignInImp
 {
-    private readonly string? _requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "Unknown";
-
-    public async Task<TokenOut> ExecuteSignInAsync(SignInAccountIn request, CancellationToken cancellationToken)
+    public async Task<TokenRes> ExecuteSignInAsync(SignInReq request, CancellationToken cancellationToken)
     {
         try
         {
@@ -28,17 +23,18 @@ public class SignInUseCase(
 
             var validation = await new SignInValidator().ValidateAsync(request, cancellationToken);
             if (!validation.IsValid)
-                throw new BadRequestException(validation.Errors.Select(er => er.ErrorMessage).ToList());
+                throw new BadRequestException(validation.Errors.Select(er => er.ErrorMessage).ToArray());
 
-            var account = await repository.GetByEmailAsync(request.Email, cancellationToken);
-            if (account is null) throw new NotFoundException([AccountMessages.EMAIL_NOT_FOUND]);
+            var account = await repository.GetByEmailAsync(request.email, cancellationToken);
+            if (account is null)
+                throw new NotFoundException([AccountMessages.EMAIL_NOT_FOUND]);
 
-            if (!cryptography.VerifyPassword(request.Password, account.Password))
+            if (!cryptography.VerifyPassword(request.password, account.Password))
                 throw new BadRequestException([AccountMessages.PASSWORD_INCORRECT]);
 
             var (token, expiry) = await tokenization.GenerateTokenAsync(account.Id, account.Role);
 
-            return new TokenOut(token, _requestId, expiry);
+            return new TokenRes(token, expiry);
         }
         catch (NotFoundException)
         {
@@ -48,10 +44,9 @@ public class SignInUseCase(
         {
             throw;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            Log.Error(ex, "Unexpected error retrieving RequestId: {RequestId}", _requestId);
-            throw new UnknownException(ex, [UnknownMessages.UNEXPECTED_ERROR]);
+            throw new UnknownException([UnknownMessages.UNEXPECTED_ERROR]);
         }
     }
 }
