@@ -5,7 +5,7 @@ namespace Teste.Infrastructure.Contexts;
 
 public class TesteDbContext(DbContextOptions<TesteDbContext> options) : DbContext(options)
 {
-    public DbSet<Account> Accounts { get; set; }
+    public DbSet<Account?> Accounts { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
 
     public DbSet<Transaction> Transactions { get; set; }

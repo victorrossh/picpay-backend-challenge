@@ -5,5 +5,5 @@ namespace Teste.Application.UseCases.Implementations;
 
 public interface ISignInImp
 {
-    Task<TokenOut> ExecuteSignInAsync(SignInAccountIn request, CancellationToken cancellationToken);
+    Task<TokenRes> ExecuteSignInAsync(SignInReq request, CancellationToken cancellationToken);
 }

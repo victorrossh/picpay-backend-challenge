@@ -11,7 +11,7 @@ public class BaseActionResult<T>(HttpStatusCode statusCode, T? data) : IActionRe
 
     public Task ExecuteResultAsync(ActionContext context)
     {
-        var objectResult = new ObjectResult(new { data = Data })
+        var objectResult = new ObjectResult(new { statusCode = (int)StatusCode, data = Data })
         {
             StatusCode = (int)StatusCode
         };
@@ -20,14 +20,14 @@ public class BaseActionResult<T>(HttpStatusCode statusCode, T? data) : IActionRe
     }
 }
 
-public class BaseActionResult(HttpStatusCode statusCode, DefaultOut? data) : IActionResult
+public class BaseActionResult(HttpStatusCode statusCode, DefaultRes? data) : IActionResult
 {
     private HttpStatusCode StatusCode { get; } = statusCode;
-    private DefaultOut? Data { get; } = data;
+    private DefaultRes? Data { get; } = data;
 
     public Task ExecuteResultAsync(ActionContext context)
     {
-        var objectResult = new ObjectResult(new { data = Data })
+        var objectResult = new ObjectResult(new { statusCode = (int)StatusCode, data = Data })
         {
             StatusCode = (int)StatusCode
         };
