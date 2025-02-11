@@ -5,7 +5,7 @@ namespace Teste.Infrastructure.Contexts;
 
 public class TesteDbContext(DbContextOptions<TesteDbContext> options) : DbContext(options)
 {
-    public DbSet<Account?> Accounts { get; set; }
+    public DbSet<Account> Accounts { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
 
     public DbSet<Transaction> Transactions { get; set; }
@@ -14,7 +14,7 @@ public class TesteDbContext(DbContextOptions<TesteDbContext> options) : DbContex
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Account>()
+        modelBuilder.Entity<Wallet>()
             .Property(a => a.Role)
             .HasConversion<int>();
 

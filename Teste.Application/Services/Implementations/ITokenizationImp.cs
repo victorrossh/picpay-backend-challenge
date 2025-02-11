@@ -4,5 +4,5 @@ namespace Teste.Application.Services.Implementations;
 
 public interface ITokenizationImp
 {
-    Task<(string, DateTime)> GenerateTokenAsync(Guid accountId, Role role);
+    Task<(string, DateTime)> GenerateTokenAsync(Guid accountId);
 }

@@ -32,7 +32,7 @@ public class SignInUseCase(
             if (!cryptography.VerifyPassword(request.password, account.Password))
                 throw new BadRequestException([AccountMessages.PASSWORD_INCORRECT]);
 
-            var (token, expiry) = await tokenization.GenerateTokenAsync(account.Id, account.Role);
+            var (token, expiry) = await tokenization.GenerateTokenAsync(account.Id);
 
             return new TokenRes(token, expiry);
         }

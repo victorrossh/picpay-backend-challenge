@@ -5,14 +5,13 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Teste.Application.Services.Implementations;
-using Teste.Domain.Enums;
 using Teste.Shared.Utilities;
 
 namespace Teste.Application.Services;
 
 public class TokenizationService(IConfiguration configuration) : ITokenizationImp
 {
-    public Task<(string, DateTime)> GenerateTokenAsync(Guid accountId, Role role)
+    public Task<(string, DateTime)> GenerateTokenAsync(Guid accountId)
     {
         var expiry = DateTime.UtcNow.Add(TimeSpan.Parse(configuration.GetConfiguration<string>("Jwt:Expiry"),
             CultureInfo.InvariantCulture));
@@ -22,8 +21,7 @@ public class TokenizationService(IConfiguration configuration) : ITokenizationIm
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity([
-                new Claim(ClaimTypes.Sid, accountId.ToString()),
-                new Claim(ClaimTypes.Role, role.ToString())
+                new Claim(ClaimTypes.Sid, accountId.ToString())
             ]),
             IssuedAt = DateTime.UtcNow,
             NotBefore = DateTime.UtcNow,

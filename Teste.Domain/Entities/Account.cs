@@ -25,8 +25,6 @@ public sealed class Account
     [Column("password", TypeName = "nvarchar(255)")]
     public required string Password { get; set; }
 
-    [Required] [Column("role")] public Role Role { get; set; }
-
 
     [Required] [Column("created_at")] public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

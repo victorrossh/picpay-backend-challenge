@@ -26,24 +26,10 @@ public class SignUpValidator : AbstractValidator<SignUpReq>
         RuleFor(c => c.identity)
             .NotEmpty()
             .WithMessage(AccountMessages.IDENTITY_REQUIRED)
-            .Length(11, 14)
+            .Matches(@"^\d{11}$|^\d{14}$")
             .WithMessage(AccountMessages.IDENTITY_INVALID)
             .Matches(@"^\d+$")
-            .WithMessage(AccountMessages.IDENTITY_INVALID)
-            .Must((request, identity) =>
-            {
-                return request.role switch
-                {
-                    Role.User when identity.Length == 11 => true,
-                    Role.Retailer when identity.Length == 14 => true,
-                    _ => false
-                };
-            })
             .WithMessage(AccountMessages.IDENTITY_INVALID);
-
-        RuleFor(c => c.role)
-            .IsInEnum()
-            .WithMessage(AccountMessages.ROLE_INVALID);
 
         RuleFor(c => c.name)
             .NotEmpty()
