@@ -24,11 +24,11 @@ BEGIN
                                 END;
 
         SET @account_id = NEWID();
-        INSERT INTO tb_account (id, name, [identity], email, password, role, created_at)
-        VALUES (@account_id, @name, @identity, @email, @password, @role, GETDATE());
+        INSERT INTO tb_account (id, name, [identity], email, password, created_at)
+        VALUES (@account_id, @name, @identity, @email, @password, GETDATE());
 
-        INSERT INTO tb_wallet (id, account_id, balance, created_at)
-        VALUES (NEWID(), @account_id, @initial_balance, GETDATE());
+        INSERT INTO tb_wallet (id, account_id, role, balance, created_at)
+        VALUES (NEWID(), @account_id, @role, @initial_balance, GETDATE());
 
         COMMIT TRANSACTION;
     END TRY

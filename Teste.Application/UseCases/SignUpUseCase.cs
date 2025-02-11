@@ -4,6 +4,7 @@ using Teste.Application.Services.Implementations;
 using Teste.Application.UseCases.Implementations;
 using Teste.Application.UseCases.Validators;
 using Teste.Domain.Entities;
+using Teste.Domain.Enums;
 using Teste.Domain.Repositories;
 using Teste.Shared.Constants;
 using Teste.Shared.Exceptions;
@@ -36,11 +37,11 @@ public class SignUpUseCase(
                 Name = request.name,
                 Identity = request.identity,
                 Email = request.email,
-                Password = cryptography.EncryptPassword(request.password),
-                Role = request.role
+                Password = cryptography.EncryptPassword(request.password)
             };
 
-            await accountRepository.AddAsync(account, cancellationToken);
+            await accountRepository.AddAsync(account, request.identity.Length == 11 ? Role.Pf : Role.Pj,
+                cancellationToken);
 
             return new DefaultRes(account.Id.ToString(), AccountMessages.ACCOUNT_CREATED);
         }

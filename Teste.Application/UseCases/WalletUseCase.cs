@@ -4,6 +4,7 @@ using Teste.Application.DTOs.Requests;
 using Teste.Application.DTOs.Responses;
 using Teste.Application.UseCases.Implementations;
 using Teste.Application.UseCases.Validators;
+using Teste.Domain.Enums;
 using Teste.Domain.Repositories;
 using Teste.Shared.Constants;
 using Teste.Shared.Exceptions;
@@ -16,7 +17,7 @@ public class WalletUseCase(
 {
     private readonly string? _requestId = httpContextAccessor.HttpContext?.Items["RequestId"]?.ToString() ?? "Unknown";
 
-    public async Task<BalanceRes> BalanceAsync(string accountId, CancellationToken cancellationToken)
+    public async Task<BalanceRes> BalanceAsync(string? accountId, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -43,7 +44,7 @@ public class WalletUseCase(
         }
     }
 
-    public async Task<DefaultRes> TransferAsync(string accountId, TransferReq request,
+    public async Task<TransferRes> TransferAsync(string? accountId, TransferReq request,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -55,18 +56,23 @@ public class WalletUseCase(
                 throw new BadRequestException(validation.Errors.Select(er => er.ErrorMessage).ToArray());
 
             var wallet = await repository.GetByAccountIdAsync(accountId, cancellationToken);
-            if (wallet!.Id.ToString() == request.payeeId)
+            if (string.Equals(wallet!.Id.ToString(), request.payeeId, StringComparison.CurrentCultureIgnoreCase))
                 throw new BadRequestException([WalletMessages.ACCOUNT_CANNOT_TRANSFER]);
 
-            var transaction =
+            if (wallet.Role == Role.Pj)
+            {
+                throw new BadRequestException([WalletMessages.ACCOUNT_PJ_CANNOT_TRANSFER]);
+            }
+
+            var (transferStatus, transferId) =
                 await repository.TransferAsync(wallet.Id.ToString(), request.payeeId, request.amount,
                     cancellationToken);
 
             if (cancellationToken.IsCancellationRequested)
                 throw new BadRequestException([WalletMessages.TRANSACTION_CANCELLED]);
 
-            return transaction == 1
-                ? new DefaultRes(accountId, WalletMessages.TRANSFER_SUCCESSFUL)
+            return transferStatus == 1
+                ? new TransferRes(transferId, WalletMessages.TRANSFER_SUCCESSFUL)
                 : throw new BadRequestException([WalletMessages.TRANSFER_FAILED]);
         }
         catch (NotFoundException)

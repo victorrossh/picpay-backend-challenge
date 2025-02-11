@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using Teste.Domain.Entities;
+using Teste.Domain.Enums;
 using Teste.Domain.Repositories;
 using Teste.Infrastructure.Contexts;
 using Teste.Shared.Utilities;
@@ -15,143 +16,110 @@ public class AccountRepository(TesteDbContext context, IConfiguration configurat
 {
     private readonly string _connection = configuration.GetConfiguration<string>("Connections:SqlServer");
 
-    public async Task<bool> AddAsync(Account? account, CancellationToken cancellationToken)
+    public async Task<bool> AddAsync(Account? account, Role role, CancellationToken cancellationToken)
     {
-        await using var connection = new SqlConnection(_connection);
-        await connection.OpenAsync(cancellationToken);
+        if (account is null) return false;
 
-        try
+        return await TryExecuteAsync(async () =>
         {
+            await using var connection = new SqlConnection(_connection);
+            await connection.OpenAsync(cancellationToken);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@name", account.Name, DbType.String);
+            parameters.Add("@identity", account.Identity, DbType.String);
+            parameters.Add("@email", account.Email, DbType.String);
+            parameters.Add("@password", account.Password, DbType.String);
+            parameters.Add("@role", role, DbType.Int32);
+
             var result = await connection.ExecuteAsync(
                 "sp_create_account",
-                new
-                {
-                    name = account?.Name,
-                    identity = account?.Identity,
-                    email = account?.Email,
-                    password = account?.Password,
-                    role = account?.Role
-                },
+                parameters,
                 commandType: CommandType.StoredProcedure
             );
 
             return result > 0;
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error occurred while adding account with email: {Email}", account?.Email);
-            throw;
-        }
+        }, "adding account", account.Email);
     }
+
 
     public async Task<bool> UpdateAsync(Account? account, CancellationToken cancellationToken)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        try
+        if (account is null) return false;
+
+        return await TryExecuteAsync(async () =>
         {
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+
             context.Accounts.Update(account);
             await context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+
             return true;
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            Log.Error(ex, "Error occurred while updating account with Id: {AccountId}", account?.Id);
-            throw;
-        }
+        }, "updating account", account.Id);
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
-        try
+        return await TryExecuteAsync(async () =>
         {
+            await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+
             var account = await context.Accounts.FindAsync([id], cancellationToken);
             if (account == null) return false;
 
             context.Accounts.Remove(account);
             await context.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
+
             return true;
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync(cancellationToken);
-            Log.Error(ex, "Error occurred while deleting account with Id: {AccountId}", id);
-            throw;
-        }
+        }, "deleting account", id);
     }
 
     public async Task<Account?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        try
-        {
-            return await context.Accounts
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error occurred while fetching account with Id: {AccountId}", id);
-            throw;
-        }
+        return await TryExecuteAsync(async () =>
+                await context.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id, cancellationToken),
+            "fetching account by Id", id);
     }
 
     public async Task<Account?> GetByEmailAsync(string email, CancellationToken cancellationToken)
     {
-        try
-        {
-            return await context.Accounts
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.Email == email, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error occurred while fetching account with email: {Email}", email);
-            throw;
-        }
+        return await TryExecuteAsync(async () =>
+                await context.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.Email == email, cancellationToken),
+            "fetching account by Email", email);
     }
 
     public async Task<IEnumerable<Account?>> GetAllAsync(CancellationToken cancellationToken)
     {
-        try
-        {
-            return await context.Accounts.AsNoTracking().ToListAsync(cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error occurred while fetching all accounts");
-            throw;
-        }
+        return await TryExecuteAsync(async () =>
+                await context.Accounts.AsNoTracking().ToListAsync(cancellationToken),
+            "fetching all accounts") ?? Enumerable.Empty<Account>();
     }
 
     public async Task<bool> ExistsByEmailAsync(string email, CancellationToken cancellationToken)
     {
-        try
-        {
-            return await context.Accounts
-                .AsNoTracking()
-                .AnyAsync(a => a.Email == email, cancellationToken);
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error occurred while checking if account exists with email: {Email}", email);
-            throw;
-        }
+        return await TryExecuteAsync(async () =>
+                await context.Accounts.AsNoTracking().AnyAsync(a => a.Email == email, cancellationToken),
+            "checking account existence by Email", email);
     }
 
     public async Task<bool> ExistsByIdentityAsync(string identity, CancellationToken cancellationToken)
     {
+        return await TryExecuteAsync(async () =>
+                await context.Accounts.AsNoTracking().AnyAsync(a => a.Identity == identity, cancellationToken),
+            "checking account existence by Identity", identity);
+    }
+
+    private static async Task<T?> TryExecuteAsync<T>(Func<Task<T>> action, string operation, object? id = null)
+    {
         try
         {
-            return await context.Accounts
-                .AsNoTracking()
-                .AnyAsync(a => a.Identity == identity, cancellationToken);
+            return await action();
         }
-        catch (Exception ex)
+        catch (IOException ex)
         {
-            Log.Error(ex, "Error occurred while checking if account exists with identity: {Identity}", identity);
+            Log.Error(ex, "Error occurred while {Operation} for Id: {Id}", operation, id);
             throw;
         }
     }

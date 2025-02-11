@@ -110,6 +110,7 @@ if (app.Environment.IsDevelopment())
     configuration.AddUserSecrets<Program>();
 }
 
+app.UseSerilogRequestLogging();
 app.UseRouting();
 app.UseCors();
 app.UseHsts();
