@@ -22,12 +22,12 @@ public class AuthenticationMiddleware(RequestDelegate next, TokenValidationParam
         var authHeader = context.Request.Headers.Authorization.FirstOrDefault();
 
         if (string.IsNullOrEmpty(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-            throw new ForbiddenException(["Authentication token is required to access this resource."]);
+            throw new UnknownException(["Authentication token is required to access this resource."]);
 
         var token = authHeader["Bearer ".Length..].Trim();
 
         if (!TryValidateToken(token, out var accountId))
-            throw new ForbiddenException(["Invalid or expired authentication token."]);
+            throw new UnknownException(["Invalid or expired authentication token."]);
 
         context.Items["AccountId"] = accountId;
 

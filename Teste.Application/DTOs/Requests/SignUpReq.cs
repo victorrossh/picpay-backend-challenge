@@ -1,6 +1,4 @@
-﻿using Teste.Domain.Enums;
-
-namespace Teste.Application.DTOs.Requests;
+﻿namespace Teste.Application.DTOs.Requests;
 
 public record SignUpReq(
     string name,

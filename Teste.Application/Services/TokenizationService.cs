@@ -11,7 +11,7 @@ namespace Teste.Application.Services;
 
 public class TokenizationService(IConfiguration configuration) : ITokenizationImp
 {
-    public Task<(string, DateTime)> GenerateTokenAsync(Guid accountId)
+    public Task<(string, string)> GenerateTokenAsync(Guid accountId)
     {
         var expiry = DateTime.UtcNow.Add(TimeSpan.Parse(configuration.GetConfiguration<string>("Jwt:Expiry"),
             CultureInfo.InvariantCulture));
@@ -33,6 +33,6 @@ public class TokenizationService(IConfiguration configuration) : ITokenizationIm
         };
 
         var token = tokenHandler.CreateToken(tokenDescriptor);
-        return Task.FromResult((tokenHandler.WriteToken(token), expiry));
+        return Task.FromResult((tokenHandler.WriteToken(token), expiry.ToString("o")));
     }
 }

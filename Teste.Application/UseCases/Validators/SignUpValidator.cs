@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using Teste.Application.DTOs.Requests;
-using Teste.Domain.Enums;
 using Teste.Shared.Constants;
 
 namespace Teste.Application.UseCases.Validators;

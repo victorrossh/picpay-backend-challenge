@@ -22,4 +22,9 @@ public class SignInValidator : AbstractValidator<SignInReq>
             .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,16}$")
             .WithMessage(AccountMessages.PASSWORD_INVALID);
     }
+
+    public async Task<object> ValidateAsync(SignUpReq instance, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

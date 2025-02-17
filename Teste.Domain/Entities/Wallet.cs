@@ -10,7 +10,7 @@ public sealed class Wallet
     [Key] public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required] [Column("account_id")] public Guid AccountId { get; set; }
-    
+
     [Required] [Column("role")] public Role Role { get; set; }
 
     [Required]
