@@ -28,5 +28,4 @@ public static class WalletMessages
         "The wallet has insufficient balance for this operation. Please check and try again.";
 
     public const string ACCOUNT_PJ_CANNOT_TRANSFER = "The account PJ cannot transfer. Please check and try again.";
-
 }

@@ -15,12 +15,19 @@ builder.Host.UseSerilog((context, options) =>
     options.ReadFrom.Configuration(context.Configuration));
 
 services.AddHealthChecks();
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(365);
+    options.Preload = true;
+    options.IncludeSubDomains = true;
+});
+services.AddAntiforgery(options => { options.SuppressXFrameOptionsHeader = true; });
 
 services.AddControllers();
 services.AddEndpointsApiExplorer();
 services.AddHttpContextAccessor();
 services.AddDataProtection();
-
+services.AddProblemDetails();
 await services.AddApplicationInjection(configuration);
 
 services.AddCors(options =>
@@ -29,8 +36,9 @@ services.AddCors(options =>
     {
         policy
             .WithOrigins(configuration.GetConfiguration<string[]>("Cors:Origins"))
-            .WithMethods(configuration.GetConfiguration<string[]>("Cors:Methods"))
-            .WithHeaders(configuration.GetConfiguration<string[]>("Cors:Headers"));
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
     });
 });
 
@@ -98,7 +106,7 @@ services.AddAuthentication(options =>
     {
         options.TokenValidationParameters = tokenValidationParameters;
         options.SaveToken = true;
-        options.RequireHttpsMetadata = false;
+        options.RequireHttpsMetadata = true;
     });
 
 var app = builder.Build();
@@ -106,18 +114,33 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", $"{configuration.GetConfiguration<string>("Swagger:Title")} v1");
+        c.OAuthClientId("swagger-ui-client-id");
+        c.OAuthAppName("Swagger UI");
+    });
     configuration.AddUserSecrets<Program>();
 }
 
 app.UseSerilogRequestLogging();
 app.UseRouting();
+
+// Ensure CORS middleware comes before authentication
 app.UseCors();
-app.UseHsts();
+
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseExceptionHandler();
 app.UseHealthChecks("/health");
+app.UseHsts();
+app.UseAntiforgery();
 app.UseMiddleware<AuthenticationMiddleware>();
-app.UseMiddleware<ExceptionMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
+//app.UseMiddleware<RetryPolicyMiddleware>();
+//app.UseMiddleware<TimeoutPolicyMiddleware>();
+//app.UseMiddleware<CircuitBreakerPolicyMiddleware>();
+app.UseXContentTypeOptions();
 app.MapControllers();
+app.MapGet("/", () => "Hello World!");
 await app.RunAsync();

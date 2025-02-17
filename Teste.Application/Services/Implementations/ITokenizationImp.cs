@@ -1,8 +1,6 @@
-﻿using Teste.Domain.Enums;
-
-namespace Teste.Application.Services.Implementations;
+﻿namespace Teste.Application.Services.Implementations;
 
 public interface ITokenizationImp
 {
-    Task<(string, DateTime)> GenerateTokenAsync(Guid accountId);
+    Task<(string, string)> GenerateTokenAsync(Guid accountId);
 }

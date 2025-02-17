@@ -2,11 +2,13 @@ namespace Teste.Shared.Constants;
 
 public static class AccountMessages
 {
-    
     public const string IDENTITY_ALREADY_REGISTERED = "The identity is already registered. Please check and try again.";
 
-    public const string EMAIL_NOT_FOUND = "The account with the provided email address was not found. Please check and try again.";
-    public const string EMAIL_ALREADY_REGISTERED = "The provided email address is already registered. Please check and try again.";
+    public const string EMAIL_NOT_FOUND =
+        "The account with the provided email address was not found. Please check and try again.";
+
+    public const string EMAIL_ALREADY_REGISTERED =
+        "The provided email address is already registered. Please check and try again.";
 
     // Email-related messages
     public const string EMAIL_INVALID = "The provided email address is invalid. Please check and try again.";

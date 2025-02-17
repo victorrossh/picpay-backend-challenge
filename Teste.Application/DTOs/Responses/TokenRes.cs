@@ -1,3 +1,3 @@
 ﻿namespace Teste.Application.DTOs.Responses;
 
-public record TokenRes(string token, DateTime expiry);
+public record TokenRes(string Token, string Expiry);
